@@ -1,0 +1,4 @@
+Position: 377 --- Cost: 114 --- Speed: 4 --- Last: 373
+Position: 378 --- Cost: 365 --- Speed: 4 --- Last: 374
+Position: 379 --- Cost: 351 --- Speed: 4 --- Last: 375
+Position: 380 --- Cost: 115 --- Speed: 3 --- Last: 377
