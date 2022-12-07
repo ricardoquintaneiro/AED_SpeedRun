@@ -455,22 +455,12 @@ static Node* priorityQueue;
 
 static int solution_6_Astar(int move_number, int position, int speed, Node* priorityQueue, int final_position)
 {
-  if (isEmpty(&priorityQueue)) printf("YO WTF");
-  printf("Passou aqui %d %d %d %d\n",move_number, position, speed, final_position);
-  
   int i, new_speed;
   solution_6_count++;
   
   // record move
   solution_6_best.positions[move_number] = position;
-  // if (position == 1)
-  //   printf("Speed: %d",move_number);
   // is it a solution?
-  if (move_number == 0)
-  {
-    solution_6_Astar(1,1,1,&priorityQueue,final_position);
-    return 0;
-  }
   if(position == final_position && speed == 1)
   {
     solution_6_best.n_moves = move_number;
@@ -492,31 +482,18 @@ static int solution_6_Astar(int move_number, int position, int speed, Node* prio
       }
     }
   }
-  if (count == 0){
-    puts("BROOOOOO");
+  if (count == 0)
     return 1;
-  }
-
-  // else if (new_speed > 1 && new_speed <= speed && i<=new_speed)
-  //     {
-  //       printf("RETORNO 1\n\n");
-  //       return 1;
-  //     }
-
 	int a = peek(&priorityQueue);
   int b = peek_Speed(&priorityQueue);
-  printf("A B %d %d\n", a, b);
   pop(&priorityQueue);
-  
-  //if (speed == _max_road_speed_) speed--;
-  while(count != 0 && solution_6_Astar(move_number + 1, a, b, &priorityQueue, final_position) == 1)
+  while(solution_6_Astar(move_number + 1, a, b, &priorityQueue, final_position) == 1)
   {
-    printf("Entrou no while!!!!! %d",speed);
+    count--;
+    if (count == 0) return 1;
     a = peek(&priorityQueue);
     b = peek_Speed(&priorityQueue);
-    if (isEmpty(&priorityQueue)) printf("YO WTF %d",speed);
     pop(&priorityQueue);
-    count--;
   }
 	return 0;
 }
@@ -530,9 +507,6 @@ static void solve_6(int final_position)
   }
   solution_6_elapsed_time = cpu_time();
   solution_6_count = 0ul;
-  for (int z = 0; z <= final_position; z++){
-    solution_6_best.positions[z] = 0;
-  }
   solution_6_best.n_moves = final_position + 100;
   priorityQueue = newNode(0, final_position+1, 0);
   solution_6_Astar(0,0,0,&priorityQueue,final_position);
@@ -684,39 +658,39 @@ int main(int argc,char *argv[argc + 1])
     //   solution_4_best.n_moves = -1;
     //   printf("                                |");
     // // }
-    if(solution_5_elapsed_time < _time_limit_)
-    {
-      solve_5(final_position);
-      if(print_this_one != 0)
-      {
-        sprintf(file_name,"%03d_5.pdf",final_position);
-        make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_5_best.n_moves,&solution_5_best.positions[0],solution_5_elapsed_time,solution_5_count,"Dijkstra recursion");
-      }
-      printf(" %3d %16lu %9.3e |",solution_5_best.n_moves,solution_5_count,solution_5_elapsed_time);
-    }
-    else
-    {
-      solution_5_best.n_moves = -1;
-      printf("                                |");
-    }
-    // if(solution_6_elapsed_time < _time_limit_)
+    // if(solution_5_elapsed_time < _time_limit_)
     // {
-    //   solve_6(final_position);
+    //   solve_5(final_position);
     //   if(print_this_one != 0)
     //   {
-    //     sprintf(file_name,"%03d_6.pdf",final_position);
-    //     make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_6_best.n_moves,&solution_6_best.positions[0],solution_6_elapsed_time,solution_6_count,"A* recursion");
+    //     sprintf(file_name,"%03d_5.pdf",final_position);
+    //     make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_5_best.n_moves,&solution_5_best.positions[0],solution_5_elapsed_time,solution_5_count,"Dijkstra recursion");
     //   }
-    //   printf(" %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
+    //   printf(" %3d %16lu %9.3e |",solution_5_best.n_moves,solution_5_count,solution_5_elapsed_time);
     // }
     // else
     // {
-    //   solution_6_best.n_moves = -1;
+    //   solution_5_best.n_moves = -1;
     //   printf("                                |");
     // }
+    if(solution_6_elapsed_time < _time_limit_)
+    {
+      solve_6(final_position);
+      // if(print_this_one != 0)
+      // {
+      //   sprintf(file_name,"%03d_6.pdf",final_position);
+      //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_6_best.n_moves,&solution_6_best.positions[0],solution_6_elapsed_time,solution_6_count,"A* recursion");
+      // }
+      printf(" %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
+    }
+    else
+    {
+      solution_6_best.n_moves = -1;
+      printf("                                |");
+    }
     printf("\n");
-    if (solution_3_best.n_moves != solution_5_best.n_moves ) {
-      printf("ERRO NO 3º ou 5º ALGORITMO!\n");
+    if (solution_3_best.n_moves != solution_6_best.n_moves ) {
+      printf("ERRO NO 3º ou 6º ALGORITMO!\n");
       return EXIT_FAILURE;
     }
     fflush(stdout);
