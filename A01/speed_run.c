@@ -9,7 +9,8 @@
 //   cc -Wall -O2 -D_use_zlib_=1 solution_speed_run.c -lm -lz
 //
 // Place your student numbers and names here
-//   N.Mec. XXXXXX  Name: XXXXXXX
+//   N.Mec. 108122  Name: Alexandre Pedro Ribeiro
+//   N.Mec. 110056  Name: Ricardo Manuel Quintaneiro Almeida
 //
 
 
@@ -17,7 +18,7 @@
 // static configuration
 //
 
-#define _max_road_size_  10000  // the maximum problem size
+#define _max_road_size_  800  // the maximum problem size
 #define _min_road_speed_   2  // must not be smaller than 1, shouldnot be smaller than 2
 #define _max_road_speed_   9  // must not be larger than 9 (only because of the PDF figure)
 
@@ -30,7 +31,7 @@
 #include <stdio.h>
 #include "../P02/elapsed_time.h"
 #include "make_custom_pdf.c"
-#include "priorityQueue.h"
+#include "priorityQueue.h" // required for Solution 6
 
 
 //
@@ -154,7 +155,7 @@ static void solution_2_recursion(int move_number,int position,int speed,int fina
     solution_2_best.n_moves = move_number;
     return;
   }
-  // if (solution_2.positions[move_number] < solution_2_best.positions[move_number]) return;          // CHECAR ISTO, INTERESSANTE
+  // if (solution_2.positions[move_number] < solution_2_best.positions[move_number]) return;
   // no, try all legal speeds
   for(new_speed = speed + 1;new_speed >= speed - 1;new_speed--)
   {
@@ -205,7 +206,7 @@ static int solution_3_test(int move_number, int position, int speed, int final_p
   // check if it is the solution
   if(position == final_position && speed == 1) {
       solution_3_best.positions[move_number] = position;
-      return 1;
+      return 0;
   }
 
   // test possible speeds, starting from fastest one
@@ -215,15 +216,15 @@ static int solution_3_test(int move_number, int position, int speed, int final_p
               ;
           }
           if (k > new_speed) {
-              if (solution_3_test(move_number + 1,position + new_speed,new_speed,final_position) == 1){
+              if (solution_3_test(move_number + 1,position + new_speed,new_speed,final_position) == 0){
                   solution_3_best.n_moves++;
                   solution_3_best.positions[move_number] = position;
-                  return 1;
+                  return 0;
               }
           }
       }
   }
-  return 0;
+  return 1;
 }
 
 static void solve_3(int final_position)
@@ -233,7 +234,6 @@ static void solve_3(int final_position)
         fprintf(stderr,"solve_3: bad final_position\n");
         exit(1);
     }
-
     solution_3_best.n_moves = 0ul;
     solution_3_elapsed_time = cpu_time();
     solution_3_count = 0ul;
@@ -249,47 +249,47 @@ static unsigned long solution_4_count; // effort dispended solving the problem
 
 static void solution_4_no_recursion(int move_number, int position, int speed, int final_position)
 {
+    int new_speed, returned, i, k;
+    // declare arrays to store move data
     int positions[final_position];
     int speeds[final_position];
 
     // register count
-    int new_speed, returned, i, j, k;
     solution_4_count++;
 
+    // record move
     positions[0] = position;
     speeds[0] = speed;
 
     for (i = 0; i <= final_position; i++)
     {
-      returned = 0;
+      returned = 1;
       if (positions[i] == final_position && speeds[i] == 1)
       {
         solution_4_best.n_moves = i;
-        for (j = 0; j <= i; j++)
-          {solution_4_best.positions[j] = positions[j];}
+        for (int j = 0; j <= i; j++)
+          solution_4_best.positions[j] = positions[j];
         break;
       }
       for (new_speed = speeds[i] + 1; new_speed >= speeds[i] - 1; new_speed--)
       {
-        if (new_speed >= 1 && new_speed <= _max_road_speed_ && positions[i] + new_speed * (new_speed + 1) / 2 <= final_position && positions[i] + new_speed <= final_position)
+        if (new_speed >= 1 && new_speed <= _max_road_speed_ && positions[i] + new_speed * (new_speed + 1) / 2 <= final_position)
         {
           for (k = 0; k <= new_speed && new_speed <= max_road_speed[positions[i] + k]; k++)
-          {
             ;
-          }
           if (k > new_speed)
           {
             solution_4_count++;
             speeds[i + 1] = new_speed;
             positions[i + 1] = positions[i] + new_speed;
-            returned = 1;
+            returned = 0;
             break;
           }
         } 
       }
       for (k = 0; k < i; k++)
       {
-        if (returned == 0 && speeds[i - 1] >= 2 && speeds[i - k] >= speeds[i - k - 1])
+        if (returned == 1 && speeds[i - 1] >= 2 && speeds[i - k] >= speeds[i - k - 1])
         {
           solution_4_count++;
           speeds[i - k] = speeds[i - k] - 1;
@@ -308,13 +308,16 @@ static void solve_4(int final_position)
         fprintf(stderr,"solve_4: bad final_position\n");
         exit(1);
     }
-
     solution_4_best.n_moves = 0ul;
     solution_4_elapsed_time = cpu_time();
     solution_4_count = 0ul;
     solution_4_no_recursion(0,0,0,final_position);
     solution_4_elapsed_time = cpu_time() - solution_4_elapsed_time;
 }
+
+//
+// SOLUTION 5
+//
 
 static solution_t solution_5_best;
 static double solution_5_elapsed_time; // time it took to solve the problem
@@ -559,82 +562,6 @@ static void solve_7(int final_position)
 }
 
 
-
-static solution_t solution_8_best;
-static double solution_8_elapsed_time; // time it took to solve the problem
-static unsigned long solution_8_count; // effort dispended solving the problem
-
-static int solution_8_test(int move_number, int position, int speed, int final_position)
-{
-  // register count
-  int new_speed, k;
-  solution_8_count++;
-
-  // check if it is the solution
-  if(position == final_position && speed == 1) {
-      solution_8_best.positions[move_number] = position;
-      return 1;
-  }
-  // printf("Pos: %d --- speed: %d --- TESTE: %d",position,speed,position + speed*(speed+1)/2);
-  if (speed > 1 && position + (speed-1)*(speed)/2 == final_position)
-  {
-    new_speed = speed-1;
-    // printf("Move: %d --- Pos: %d --- New speed: %d\n",move_number,position,new_speed);
-
-    for (k=0;k<=new_speed && new_speed <= max_road_speed[position + k];k++) {
-              ;
-          }
-          if (k > new_speed) {
-              if (solution_8_test(move_number + 1,position + new_speed,new_speed,final_position) == 1){
-                  solution_8_best.n_moves++;
-                  solution_8_best.positions[move_number] = position;
-                  return 1;
-              }
-          }
-
-
-    // solution_8_test(move_number + 1,position + new_speed,new_speed,final_position);
-    // solution_8_best.n_moves++;
-    // solution_8_best.positions[move_number] = position;
-    // return 1;
-  }
-
-  // test possible speeds, starting from fastest one
-  for(new_speed = speed + 1;new_speed >= speed - 1;new_speed--){
-        if (new_speed >= 1 && new_speed <= _max_road_speed_ && position + new_speed*(new_speed+1)/2 <= final_position) {
-          for (k=0;k<=new_speed && new_speed <= max_road_speed[position + k];k++) {
-              ;
-          }
-          if (k > new_speed) {
-              if (solution_8_test(move_number + 1,position + new_speed,new_speed,final_position) == 1){
-                  solution_8_best.n_moves++;
-                  solution_8_best.positions[move_number] = position;
-                  return 1;
-              }
-          }
-      }
-  }
-  return 0;
-}
-
-
-static void solve_8(int final_position)
-{
-    if(final_position < 1 || final_position > _max_road_size_)
-    {
-        fprintf(stderr,"solve_8: bad final_position\n");
-        exit(1);
-    }
-
-    solution_8_best.n_moves = 0ul;
-    solution_8_elapsed_time = cpu_time();
-    solution_8_count = 0ul;
-    solution_8_test(0,0,0,final_position);
-    solution_8_elapsed_time = cpu_time() - solution_8_elapsed_time;
-}
-
-
-
 //
 // example of the slides
 //
@@ -714,14 +641,14 @@ int main(int argc,char *argv[argc + 1])
   // double sol_3_times[800];
 
 
-  FILE* ptr = fopen("sol_6_roadSize10000_110056.txt", "w");
+  // FILE* ptr = fopen("sol_6_roadSize10000_110056.txt", "w");
 
   while(final_position <= _max_road_size_/* && final_position <= 20*/)
   {
     print_this_one = (final_position == 10 || final_position == 20 || final_position == 50 || final_position == 100
       || final_position == 200 || final_position == 400 || final_position == 800) ? 1 : 0;
-    // printf("%3d |",final_position);
-    fprintf(ptr,"%3d |",final_position);
+    printf("%3d |",final_position);
+    // fprintf(ptr,"%3d |",final_position);
     // first solution method (very bad)
     // if(solution_1_elapsed_time < _time_limit_)
     // {
@@ -743,11 +670,11 @@ int main(int argc,char *argv[argc + 1])
     // if(solution_2_elapsed_time < _time_limit_)
     // {
     //   solve_2(final_position);
-    //   if(print_this_one != 0)
-    //   {
-    //     sprintf(file_name,"%03d_2.pdf",final_position);
-    //     make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_2_best.n_moves,&solution_2_best.positions[0],solution_2_elapsed_time,solution_2_count,"Slightly better recursion");
-    //   }
+    //   // if(print_this_one != 0)
+    //   // {
+    //   //   sprintf(file_name,"%03d_2.pdf",final_position);
+    //   //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_2_best.n_moves,&solution_2_best.positions[0],solution_2_elapsed_time,solution_2_count,"Slightly better recursion");
+    //   // }
     //   printf(" %3d %16lu %9.3e |",solution_2_best.n_moves,solution_2_count,solution_2_elapsed_time);
     // }
     // else
@@ -756,34 +683,34 @@ int main(int argc,char *argv[argc + 1])
     //   printf("                                |");
     // }
     // // done
-    // if(solution_3_elapsed_time < _time_limit_)
-    // {
-    //   solve_3(final_position);
-    //   // if(print_this_one != 0)
-    //   // {
-    //   //   sprintf(file_name,"%03d_3.pdf",final_position);
-    //   //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_3_best.n_moves,&solution_3_best.positions[0],solution_3_elapsed_time,solution_3_count,"Fast recursion");
-    //   // }
-    //   // printf(" %3d %16lu %9.3e |",solution_3_best.n_moves,solution_3_count,solution_3_elapsed_time);
-    //   fprintf(ptr," %3d %16lu %9.3e |",solution_3_best.n_moves,solution_3_count,solution_3_elapsed_time);
-    // }
-    // else
-    // {
-    //   solution_3_best.n_moves = -1;
-    //   printf("                                |");
-    // }
-    // if(solution_4_elapsed_time < _time_limit_)
-    // {
-    //   solve_4(final_position);
-    //   // if(print_this_one != 0)
-    //   // {
-    //   //   sprintf(file_name,"%03d_4_%d.pdf",final_position,n_mec);
-    //   //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_4_best.n_moves,&solution_4_best.positions[0],solution_4_elapsed_time,solution_4_count,"No recursion");
-    //   // }
-    //   printf(" %3d %16lu %9.3e |",solution_4_best.n_moves,solution_4_count,solution_4_elapsed_time);
-    //   // fprintf(ptr," %3d %16lu %9.3e |",solution_4_best.n_moves,solution_4_count,solution_4_elapsed_time);
+    if(solution_3_elapsed_time < _time_limit_)
+    {
+      solve_3(final_position);
+      // if(print_this_one != 0)
+      // {
+      //   sprintf(file_name,"%03d_3.pdf",final_position);
+      //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_3_best.n_moves,&solution_3_best.positions[0],solution_3_elapsed_time,solution_3_count,"Fast recursion");
+      // }
+      printf(" %3d %16lu %9.3e |",solution_3_best.n_moves,solution_3_count,solution_3_elapsed_time);
+      // fprintf(ptr," %3d %16lu %9.3e |",solution_3_best.n_moves,solution_3_count,solution_3_elapsed_time);
+    }
+    else
+    {
+      solution_3_best.n_moves = -1;
+      printf("                                |");
+    }
+    if(solution_4_elapsed_time < _time_limit_)
+    {
+      solve_4(final_position);
+      // if(print_this_one != 0)
+      // {
+      //   sprintf(file_name,"%03d_4_%d.pdf",final_position,n_mec);
+      //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_4_best.n_moves,&solution_4_best.positions[0],solution_4_elapsed_time,solution_4_count,"Fast Dynamic Non-Recursion");
+      // }
+      printf(" %3d %16lu %9.3e |",solution_4_best.n_moves,solution_4_count,solution_4_elapsed_time);
+      // fprintf(ptr," %3d %16lu %9.3e |",solution_4_best.n_moves,solution_4_count,solution_4_elapsed_time);
 
-    // }
+    }
     // else
     // {
     //   solution_4_best.n_moves = -1;
@@ -805,23 +732,23 @@ int main(int argc,char *argv[argc + 1])
     //   solution_5_best.n_moves = -1;
     //   printf("                                |");
     // }
-    if(solution_6_elapsed_time < _time_limit_)
-    {
-      solve_6(final_position);
-      // if(print_this_one != 0)
-      // {
-      //   sprintf(file_name,"%03d_6.pdf",final_position);
-      //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_6_best.n_moves,&solution_6_best.positions[0],solution_6_elapsed_time,solution_6_count,"A* recursion");
-      // }
-      // printf(" %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
-      fprintf(ptr," %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
+    // if(solution_6_elapsed_time < _time_limit_)
+    // {
+    //   solve_6(final_position);
+    //   // if(print_this_one != 0)
+    //   // {
+    //   //   sprintf(file_name,"%03d_6.pdf",final_position);
+    //   //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_6_best.n_moves,&solution_6_best.positions[0],solution_6_elapsed_time,solution_6_count,"A* recursion");
+    //   // }
+    //   printf(" %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
+    //   // fprintf(ptr," %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
 
-    }
-    else
-    {
-      solution_6_best.n_moves = -1;
-      printf("                                |");
-    }
+    // }
+    // else
+    // {
+    //   solution_6_best.n_moves = -1;
+    //   printf("                                |");
+    // }
     // if(solution_7_elapsed_time < _time_limit_)
     // {
     //   solve_7(final_position);
@@ -852,14 +779,14 @@ int main(int argc,char *argv[argc + 1])
     //   solution_8_best.n_moves = -1;
     //   printf("                                |");
     // }
-    // printf("\n");
-    fprintf(ptr,"\n");
-    // if (solution_3_best.n_moves != solution_2_best.n_moves ) {
-    //   printf("ERRO NO 3º ou 8º ALGORITMO!\n");
-    //   return EXIT_FAILURE;
-    // }
-    // fflush(stdout);
-    fflush(ptr);
+    printf("\n");
+    // fprintf(ptr,"\n");
+    if (solution_3_best.n_moves != solution_4_best.n_moves ) {
+      printf("ERRO NO 3º ou 5º ALGORITMO!\n");
+      return EXIT_FAILURE;
+    }
+    fflush(stdout);
+    // fflush(ptr);
     // new final_position
     if(final_position < 50000)
       final_position += 1;
@@ -870,7 +797,7 @@ int main(int argc,char *argv[argc + 1])
     else
       final_position += 20;
   }
-  fclose(ptr);
+  // fclose(ptr);
   // printf("--- + --- ---------------- --------- + --- ---------------- --------- + --- ---------------- --------- +\n");
   // printf("\nSolution 1 times:\n");
   // for (int i = 0; i < 800; i++) {
