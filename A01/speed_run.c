@@ -345,7 +345,7 @@ static int solution_5_recursion(int position, int final_position)
             node[i][node_speed] = 1;
         }
         solution_5_recursion(1, final_position);
-        return 1;
+        return 0;
     }
 
     if (position == final_position && speed == 1)
@@ -354,24 +354,20 @@ static int solution_5_recursion(int position, int final_position)
         solution_5_best.n_moves = 0;
         while (position != 0)
         {
-            positions[solution_5_best.n_moves] = position;
-            position = node[position][node_lastPosition];
-            solution_5_best.n_moves++;
+          positions[solution_5_best.n_moves] = position;
+          position = node[position][node_lastPosition];
+          solution_5_best.n_moves++;
         }
         int m = 0;
         for (int j = solution_5_best.n_moves; j > 0; j--)
         {
             solution_5_best.positions[j] = positions[m++];
         }
-        return 1;
-    }
-    if (position == final_position && speed != 1)
-    {
-        printf("For position: %d", position);
-        exit(888);
         return 0;
     }
+
     int new_position, temp_cost, temp_pos, temp_ns;
+
     for (new_speed = speed + 1; new_speed >= speed - 1; new_speed--)
     {
         if (new_speed >= 1 && new_speed <= _max_road_speed_ && position + new_speed * (new_speed + 1) / 2 <= final_position)
@@ -390,8 +386,8 @@ static int solution_5_recursion(int position, int final_position)
                 node[new_position][node_lastPosition] = position;
                 node[new_position][node_speed] = new_speed;
             }
-            if (solution_5_recursion(position + 1, final_position) == 1)
-                return 1;
+            if (solution_5_recursion(position + 1, final_position) == 0)
+                return 0;
             else
             {
               node[new_position][node_cost] = temp_cost;
@@ -408,10 +404,10 @@ static int solution_5_recursion(int position, int final_position)
     }
     if (i < final_position + 1)
     {
-        if (solution_5_recursion(i, final_position) == 1)
-          return 1;
+        if (solution_5_recursion(i, final_position) == 0)
+          return 0;
     }
-    return 0;
+    return 1;
 }
 
 static void solve_5(int final_position)
@@ -626,11 +622,11 @@ int main(int argc,char *argv[argc + 1])
   solution_5_elapsed_time = 0.0;
   solution_6_elapsed_time = 0.0;
   solution_7_elapsed_time = 0.0;
-  // printf("    + --- ---------------- --------- +\n");
-  // printf("    |     Fast Dynamic non-recursion |\n");
-  // printf("--- + --- ---------------- --------- +\n");
-  // printf("  n | sol            count  cpu time |\n");
-  // printf("--- + --- ---------------- --------- +\n");
+  printf("    + --- ---------------- --------- +\n");
+  printf("    |       Speed-Based A* Recursion |\n");
+  printf("--- + --- ---------------- --------- +\n");
+  printf("  n | sol            count  cpu time |\n");
+  printf("--- + --- ---------------- --------- +\n");
   // printf("    + --- ---------------- --------- + --- ---------------- --------- + --- ---------------- --------- +\n");
   // printf("    |             Very bad recursion |      Slightly better recursion |                 Best recursion |\n");
   // printf("--- + --- ---------------- --------- + --- ---------------- --------- + --- ---------------- --------- +\n");
@@ -683,34 +679,34 @@ int main(int argc,char *argv[argc + 1])
     //   printf("                                |");
     // }
     // // done
-    if(solution_3_elapsed_time < _time_limit_)
-    {
-      solve_3(final_position);
-      // if(print_this_one != 0)
-      // {
-      //   sprintf(file_name,"%03d_3.pdf",final_position);
-      //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_3_best.n_moves,&solution_3_best.positions[0],solution_3_elapsed_time,solution_3_count,"Fast recursion");
-      // }
-      printf(" %3d %16lu %9.3e |",solution_3_best.n_moves,solution_3_count,solution_3_elapsed_time);
-      // fprintf(ptr," %3d %16lu %9.3e |",solution_3_best.n_moves,solution_3_count,solution_3_elapsed_time);
-    }
-    else
-    {
-      solution_3_best.n_moves = -1;
-      printf("                                |");
-    }
-    if(solution_4_elapsed_time < _time_limit_)
-    {
-      solve_4(final_position);
-      // if(print_this_one != 0)
-      // {
-      //   sprintf(file_name,"%03d_4_%d.pdf",final_position,n_mec);
-      //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_4_best.n_moves,&solution_4_best.positions[0],solution_4_elapsed_time,solution_4_count,"Fast Dynamic Non-Recursion");
-      // }
-      printf(" %3d %16lu %9.3e |",solution_4_best.n_moves,solution_4_count,solution_4_elapsed_time);
-      // fprintf(ptr," %3d %16lu %9.3e |",solution_4_best.n_moves,solution_4_count,solution_4_elapsed_time);
+    // if(solution_3_elapsed_time < _time_limit_)
+    // {
+    //   solve_3(final_position);
+    //   // if(print_this_one != 0)
+    //   // {
+    //   //   sprintf(file_name,"%03d_3.pdf",final_position);
+    //   //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_3_best.n_moves,&solution_3_best.positions[0],solution_3_elapsed_time,solution_3_count,"Fast recursion");
+    //   // }
+    //   printf(" %3d %16lu %9.3e |",solution_3_best.n_moves,solution_3_count,solution_3_elapsed_time);
+    //   // fprintf(ptr," %3d %16lu %9.3e |",solution_3_best.n_moves,solution_3_count,solution_3_elapsed_time);
+    // }
+    // else
+    // {
+    //   solution_3_best.n_moves = -1;
+    //   printf("                                |");
+    // }
+    // if(solution_4_elapsed_time < _time_limit_)
+    // {
+    //   solve_4(final_position);
+    //   // if(print_this_one != 0)
+    //   // {
+    //   //   sprintf(file_name,"%03d_4_%d.pdf",final_position,n_mec);
+    //   //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_4_best.n_moves,&solution_4_best.positions[0],solution_4_elapsed_time,solution_4_count,"Fast Dynamic Non-Recursion");
+    //   // }
+    //   printf(" %3d %16lu %9.3e |",solution_4_best.n_moves,solution_4_count,solution_4_elapsed_time);
+    //   // fprintf(ptr," %3d %16lu %9.3e |",solution_4_best.n_moves,solution_4_count,solution_4_elapsed_time);
 
-    }
+    // }
     // else
     // {
     //   solution_4_best.n_moves = -1;
@@ -721,8 +717,8 @@ int main(int argc,char *argv[argc + 1])
     //   solve_5(final_position);
     //   // if(print_this_one != 0)
     //   // {
-    //   //   sprintf(file_name,"%03d_5.pdf",final_position);
-    //   //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_5_best.n_moves,&solution_5_best.positions[0],solution_5_elapsed_time,solution_5_count,"Dijkstra recursion");
+    //   //   sprintf(file_name,"%03d_5_%d.pdf",final_position,n_mec);
+    //   //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_5_best.n_moves,&solution_5_best.positions[0],solution_5_elapsed_time,solution_5_count,"Unitary-Cost Dijkstra Recursion");
     //   // }
     //   printf(" %3d %16lu %9.3e |",solution_5_best.n_moves,solution_5_count,solution_5_elapsed_time);
     //   // fprintf(ptr," %3d %16lu %9.3e |",solution_5_best.n_moves,solution_5_count,solution_5_elapsed_time);
@@ -732,23 +728,22 @@ int main(int argc,char *argv[argc + 1])
     //   solution_5_best.n_moves = -1;
     //   printf("                                |");
     // }
-    // if(solution_6_elapsed_time < _time_limit_)
-    // {
-    //   solve_6(final_position);
-    //   // if(print_this_one != 0)
-    //   // {
-    //   //   sprintf(file_name,"%03d_6.pdf",final_position);
-    //   //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_6_best.n_moves,&solution_6_best.positions[0],solution_6_elapsed_time,solution_6_count,"A* recursion");
-    //   // }
-    //   printf(" %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
-    //   // fprintf(ptr," %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
-
-    // }
-    // else
-    // {
-    //   solution_6_best.n_moves = -1;
-    //   printf("                                |");
-    // }
+    if(solution_6_elapsed_time < _time_limit_)
+    {
+      solve_6(final_position);
+      // if(print_this_one != 0)
+      // {
+      //   sprintf(file_name,"%03d_6_%d.pdf",final_position,n_mec);
+      //   make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_6_best.n_moves,&solution_6_best.positions[0],solution_6_elapsed_time,solution_6_count,"Speed-Based A* Recursion");
+      // }
+      printf(" %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
+      // fprintf(ptr," %3d %16lu %9.3e |",solution_6_best.n_moves,solution_6_count,solution_6_elapsed_time);
+    }
+    else
+    {
+      solution_6_best.n_moves = -1;
+      printf("                                |");
+    }
     // if(solution_7_elapsed_time < _time_limit_)
     // {
     //   solve_7(final_position);
@@ -781,14 +776,14 @@ int main(int argc,char *argv[argc + 1])
     // }
     printf("\n");
     // fprintf(ptr,"\n");
-    if (solution_3_best.n_moves != solution_4_best.n_moves ) {
-      printf("ERRO NO 3º ou 5º ALGORITMO!\n");
-      return EXIT_FAILURE;
-    }
+    // if (solution_3_best.n_moves != solution_5_best.n_moves ) {
+    //   printf("ERRO NO 3º ou 5º ALGORITMO!\n");
+    //   return EXIT_FAILURE;
+    // }
     fflush(stdout);
     // fflush(ptr);
     // new final_position
-    if(final_position < 50000)
+    if(final_position < 50)
       final_position += 1;
     else if(final_position < 100)
       final_position += 5;
@@ -798,7 +793,8 @@ int main(int argc,char *argv[argc + 1])
       final_position += 20;
   }
   // fclose(ptr);
-  // printf("--- + --- ---------------- --------- + --- ---------------- --------- + --- ---------------- --------- +\n");
+  // // printf("--- + --- ---------------- --------- + --- ---------------- --------- + --- ---------------- --------- +\n");
+  printf("--- + --- ---------------- --------- +\n");
   // printf("\nSolution 1 times:\n");
   // for (int i = 0; i < 800; i++) {
   //   printf("%.9lf ",sol_1_times[i]);
